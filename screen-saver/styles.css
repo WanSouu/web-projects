@@ -1,0 +1,41 @@
+@font-face {
+  font-family: OpenSans-Regular;
+  src: url(OpenSans-Regular.ttf);
+}
+
+#dvd-id {
+  width:10vw;
+}
+html {height: 100%; margin: 0; overflow: hidden}
+body { background-color: black; height: 100%; margin: 0; overflow: hidden; padding: 0;}
+#screensaver-item {
+  height: 100%;;
+}
+#dvd-id {
+  position: absolute;
+}
+#debug {
+  display:block;
+  color: white;
+  margin:0;
+  width:10vw;
+  font-family:OpenSans-Regular;
+  text-align: center;
+  position:fixed;
+  user-select: none;
+}
+#info-box {
+  user-select: none;
+  display:block;
+  color: white;
+  opacity: 0;
+  transition: opacity 500ms;
+  position:fixed;
+  bottom: 0;
+  margin:0;
+  padding:0;
+  width:100vw;
+  margin-bottom:10px;
+  font-family:OpenSans-Regular;
+  text-align: center;
+}

@@ -1,0 +1,100 @@
+@font-face {
+  font-family: "OpenSans";
+  src: url("assets/fonts/OpenSans-Regular.ttf");
+}
+@font-face {
+  font-family: "OpenSans";
+  src: url("assets/fonts/OpenSans-Bold.ttf");
+  font-weight: bold;
+}
+@font-face {
+  font-family: "OpenSans";
+  src: url("assets/fonts/OpenSans-Light.ttf");
+  font-weight: lighter;
+}
+body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#dice-roll-area {
+  line-height:7em;
+}
+#dice-roll {
+  margin-top:30%;
+  font-size:12em;
+  text-align: center;
+  animation-duration: .2s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 5;
+  user-select: none;
+  position: relative;
+  z-index: -1;
+}
+.roll-animation {
+  animation-name: roll;
+}
+
+@keyframes roll {
+  25% {
+    filter: blur(5px);
+    transform: rotate(-30deg);
+  }
+
+  50% {
+    filter: blur(0px);
+    transform: rotate(0deg);
+  }
+
+  75% {
+    filter: blur(5px);
+    transform: rotate(30deg);
+  }
+  100% {
+    filter: blur(0px);
+    transform: rotate(0deg);
+  }
+  
+}
+#roll-button {
+  width:6em;
+  font-family:OpenSans;
+  font-size:2em;
+  font-weight:bold;
+  border:black 2px solid;
+  background:none;
+  border-radius:5px;
+  aspect-ratio: 6/2;
+  cursor:pointer;
+  user-select: none;
+  transition: transform 0.1s ease-in-out;
+}
+#roll-button:hover {
+  transform: translateY(0.05em);
+}
+#roll-button:active {
+  transform: translateY(0.25em);
+}
+#history-area {
+  text-align: right;
+  min-height:400px;
+  height:1500px;
+  width:12em;
+  border-radius: 5px;
+  padding:0;
+  list-style-position: inside;
+  overflow:hidden;
+  line-height:80px;
+}
+.dice-roll-history {
+  user-select: none;
+  font-family: OpenSans;
+  width:100%;
+  height:15%;
+  vertical-align: top;
+  font-size: 4em;
+}

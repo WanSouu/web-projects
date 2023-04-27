@@ -1,0 +1,133 @@
+@font-face {
+  font-family: "OpenSans";
+  src: url("assets/fonts/OpenSans-Regular.ttf");
+}
+@font-face {
+  font-family: "OpenSans";
+  src: url("assets/fonts/OpenSans-Bold.ttf");
+  font-weight: bold;
+}
+@font-face {
+  font-family: "OpenSans";
+  src: url("assets/fonts/OpenSans-Light.ttf");
+  font-weight: lighter;
+}
+:root {
+  --wallet-deg: 5deg;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+#money-wrapper {
+  height:50vh;
+  width:100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position:absolute;
+  left:0;
+  top:0;
+}
+
+.font-regular {
+  font-family: OpenSans;
+}
+.font-bold {
+  font-family: OpenSans;
+  font-weight: bold;
+}
+#shop-wrapper {
+  height:fit-content;
+  max-height:40%;
+  overflow-y:scroll;
+  overflow-x:visible;
+  width:75vw;
+  bottom:0;
+  position:absolute;
+  list-style: none;
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+  border-top: black 10px solid;
+  border-radius: 10px;
+}
+#shop-wrapper::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+.shop-item {
+  margin:auto;
+  display:flex;
+  justify-content: space-between;
+  flex-wrap:wrap;
+  width:clamp(270px,30vw,500px);
+  height:clamp(30px,5vh,5vh);
+  color:black;
+  border: 2px black solid;
+  margin-bottom: 1vh;
+  padding: 1vh 1vw;
+  border-radius: 5px;
+  min-height:40px;
+  user-select: none;
+}
+.shop-item > * {
+  font-size:clamp(0.75em,1vw,1vw);
+  margin: 0 1%;
+}
+.shop-item > .item-left {
+  text-align: left;
+  width: 60%;
+}
+.shop-item > .item-right {
+  text-align: right;
+  width: 35%;
+}
+.shop-item-button {
+  cursor:pointer;
+  height:55%;
+  text-align: center !important;
+  border: black 2px solid;
+  border-radius: 5px;
+  background: none;
+}
+#wallet-div {
+  font-size:2.5vw;
+  animation: shake-anim 1s ease-in-out infinite;
+  transform: rotate(var(--wallet-deg))
+}
+#money-button {
+  width: 25%;
+  aspect-ratio: 3/1;
+  margin-top:1vw;
+  font-size:5vw;
+  border: black solid 2px;
+  border-radius: 0.5vw;
+  background: none;
+  color: black;
+  transition: color 0.075s ease-in, background 0.075s ease-out, transform 0.075s ease-in, box-shadow 0.075s ease-in;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 2vw 2vw 0px 0px black;
+}
+#money-button:hover {
+  color:rgba(0, 0, 0, 0.5)
+}
+#money-button:active {
+  color: white;
+  box-shadow: 0vw 0vw 0px 0px black;
+  transform: translateY(2vw);
+}
+
+@keyframes shake-anim {
+  50% {
+    transform: rotate(calc(var(--wallet-deg) * -1))
+  }
+  100% {
+    transform: rotate(var(--wallet-deg));
+  }
+}
