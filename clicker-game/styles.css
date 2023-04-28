@@ -44,7 +44,6 @@ body {
   font-weight: bold;
 }
 #shop-wrapper {
-  height:fit-content;
   max-height:40%;
   overflow-y:scroll;
   overflow-x:visible;
@@ -52,14 +51,32 @@ body {
   bottom:0;
   position:absolute;
   list-style: none;
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
   border-top: black 10px solid;
   border-radius: 10px;
+  transition: max-height 0.33s;
+  transition-delay: 0s;
 }
-#shop-wrapper::-webkit-scrollbar { 
-  display: none;  /* Safari and Chrome */
+.shop-open {
+  
+  max-height:80% !important;
+  transition: max-height 0.33s !important;
+  transition-delay: 0.2s !important;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+
 .shop-item {
   margin:auto;
   display:flex;
@@ -98,10 +115,57 @@ body {
   transition: box-shadow 0.1s;
   box-shadow: inset 1px 1px 0px 0px black;
 }
+#bottom-wrapper {
+  position:absolute; 
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#lootbox-wrapper {
+  top:0;
+  position: absolute;
+  border-top: 4px solid black;
+  border-bottom: 4px solid black;
+  width:clamp(360px,50vw,1100px);
+  transform: scaleX(0%);
+  aspect-ratio: 10/2;
+  overflow:hidden;
+  user-select: none;
+  z-index: -1;
+  transition: transform 0.2s;
+  transition-delay: 0s;
+}
+#lootbox-spinner {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  height:100%;
+  max-width:100%;
+  overflow:hidden;
+  white-space: nowrap;
+  user-select: none;
+}
+.spinner-open {
+  transform: scaleX(100%) !important;
+  transition-delay: 0.2s !important;
+}
+
+.lootbox-item {
+  margin:0;
+  display: inline-block;
+  height: 90%;
+  aspect-ratio: 1/1;
+  border: 1px solid black;
+}
 .shop-item-button:active {
   box-shadow: inset -1px -1px 0px 0px black;
 }
 #wallet-div {
+  user-select: none;
   font-size:2.5vw;
   animation: shake-anim 1s ease-in-out infinite;
   transform: rotate(var(--wallet-deg))
