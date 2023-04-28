@@ -94,6 +94,12 @@ body {
   border: black 2px solid;
   border-radius: 5px;
   background: none;
+  overflow:hidden;
+  transition: box-shadow 0.1s;
+  box-shadow: inset 1px 1px 0px 0px black;
+}
+.shop-item-button:active {
+  box-shadow: inset -1px -1px 0px 0px black;
 }
 #wallet-div {
   font-size:2.5vw;

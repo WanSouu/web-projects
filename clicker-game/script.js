@@ -9,6 +9,8 @@ class shop_item {
     this.desc=description
     this.price=price;
     this.on_buy=on_buy
+    this.bought=0;
+    this.id=0
   }
 }
 function onBuy() {
@@ -16,11 +18,13 @@ function onBuy() {
     shop_items[this.style.getPropertyValue("--button-id")].on_buy();
     money-=shop_items[this.style.getPropertyValue("--button-id")].price;
     updateWallet();
+    shop_items[this.style.getPropertyValue("--button-id")].bought++;
+    updateShopItems();
   }
 }
 let shop_items=[
-  new shop_item("Better clicks","Get $0.01 more per click!", 0.02,() => {money_per_click+=0.01}),
-  new shop_item("Auto clicks","Get $0.005 per second!", 0.05,() => {money_per_second+=0.005})
+  new shop_item("Better clicks","Get $0.01 more per click!", 0.15,() => {money_per_click+=0.01}),
+  new shop_item("Auto clicks","Get $0.01 per second!", 0.5,() => {money_per_second+=0.005})
   
 ]
 
@@ -42,18 +46,26 @@ function gameInit() {
   }
   for(var i = 0; i < shop_items.length; i++) {
     cur=document.createElement("li")
-    cur.innerHTML=
-    `
-    <span class="shop-item-title item-left">${shop_items[i].name}</span>
-    <span class="shop-item-price item-right">$${shop_items[i].price.toFixed(2)}</span>
-    <span class="shop-item-desc item-left">${shop_items[i].desc}</span>
-    <button class="shop-item-button item-right">BUY</button>
-    `
-    cur.getElementsByTagName("button")[0].style.setProperty("--button-id",i)
+    shop_items[i].id=i;
+    cur.innerHTML=insertItemText(shop_items[i])
     cur.getElementsByTagName("button")[0].onclick=onBuy;
     cur.setAttribute("class","shop-item font-bold")
     elements.shop.append(cur)
   }
+}
+function updateShopItems() {
+  for (const childEl of elements.shop.children) {
+    childEl.innerHTML=insertItemText(shop_items[childEl.getElementsByTagName("button")[0].style.getPropertyValue("--button-id")])
+    childEl.getElementsByTagName("button")[0].onclick=onBuy;
+  }
+}
+function insertItemText(item) {
+  return (`
+    <span class="shop-item-title item-left">${item.bought} | ${item.name}</span>
+    <span class="shop-item-price item-right">$${item.price.toFixed(2)}</span>
+    <span class="shop-item-desc item-left">${item.desc}</span>
+    <button class="shop-item-button item-right" style="--button-id:${item.id};">BUY</button>
+    `)
 }
 function addMoney() {
   money+=money_per_click;
