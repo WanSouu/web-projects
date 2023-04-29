@@ -24,7 +24,7 @@ body {
   flex-direction: column;
 }
 
-#money-wrapper {
+#top-wrapper {
   height:50vh;
   width:100vw;
   display: flex;
@@ -36,6 +36,8 @@ body {
   top:0;
 }
 
+
+
 .font-regular {
   font-family: OpenSans;
 }
@@ -43,14 +45,40 @@ body {
   font-family: OpenSans;
   font-weight: bold;
 }
+
+#inventory-wrapper {
+  height:90%;
+  width:45%;
+  position:absolute;
+  display:inline-block;
+  text-align: center;
+  right:0;
+}
+.inventory-item {
+  width:15%;
+  aspect-ratio: 1/1;
+  border: 1px solid black;
+  font-size:1em;
+  text-align: center;
+  display: inline-block;
+  margin:1%;
+}
+#shop-list {
+  width: 45%;
+  display:inline-block;
+}
+
 #shop-wrapper {
+  padding-top: 1%;
   max-height:40%;
   overflow-y:scroll;
   overflow-x:visible;
   width:75vw;
   bottom:0;
   position:absolute;
-  list-style: none;
+
+
+  
   border-top: black 10px solid;
   border-radius: 10px;
   transition: max-height 0.33s;
