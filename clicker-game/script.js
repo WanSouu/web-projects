@@ -214,8 +214,8 @@ function lootboxAnimationToggle() {
     cur_padding.changing=0;
   }
   elements.spinner.style.paddingLeft=cur_padding.left+"%";
-    elements.spinner.style.paddingRight=cur_padding.right+"%";
-  if (animation_duration>=minimum_duration) {
+  elements.spinner.style.paddingRight=cur_padding.right+"%";
+  if (animation_duration>=minimum_duration && stop_at_time==-1) {
     stop_at_time=(0.2+Math.random()*0.6)*animation_duration
     if (stop_at_time>4) { stop_at_time=4 }
     //console.log("!!! --------- STOPPING IN "+ stop_at_time +"s ---------- !!!")
@@ -251,6 +251,7 @@ let lootbox_items=10
 let cur_lootbox_opening=-1;
 
 function lootboxAnimation() {
+  stop_at_time=-1;
   minimum_duration=2+(Math.random()-0.275)*3
   cur_padding={ left: 0, right: 0, changing: 0}
   animation_state=-1
