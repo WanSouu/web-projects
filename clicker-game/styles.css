@@ -143,7 +143,7 @@ body {
   height: 100%;
   width:50%;
   transform: translateY(-100%);
-  border-right: 5px goldenrod solid;
+  border-right: 4px black solid;
 }
 #lootbox-spinner {
   display:flex;
@@ -154,7 +154,9 @@ body {
   overflow:hidden;
   white-space: nowrap;
   user-select: none;
+  padding-right: 36.5%;
   padding-left:36.5%;
+  transition: padding-right 1s, padding-left 0s;
 }
 .spinner-open {
   transform: scaleX(100%) !important;
@@ -169,7 +171,7 @@ body {
 .item-name {
   font-family: OpenSans;
   font-weight: bold;
-  font-size:2vw;
+  font-size:1vw;
   width:100%;
   height:100%;
   display: flex;

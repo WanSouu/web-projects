@@ -14,7 +14,7 @@ class shop_item {
   }
 }
 function onBuy() {
-  if (money>=shop_items[this.style.getPropertyValue("--button-id")].price) {
+  if (money>=shop_items[this.style.getPropertyValue("--button-id")].price && stopLootbox==true) {
     shop_items[this.style.getPropertyValue("--button-id")].on_buy();
     money-=shop_items[this.style.getPropertyValue("--button-id")].price;
     updateWallet();
@@ -25,13 +25,7 @@ function onBuy() {
 let shop_items=[
   new shop_item("Better clicks","Get $0.01 more per click!", 0.15,() => {money_per_click+=0.01}),
   new shop_item("Auto clicks","Get $0.01 per second!", 0.5,() => {money_per_second+=0.005}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Loot bag")}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Starter")}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Starter")}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Starter")}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Starter")}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Starter")}),
-  new shop_item("Starter","Open Starter lootbox!", 0.01,() => {openLootbox("Starter")})
+  new shop_item("Starter","Open a Lootbag!", 0.00,() => {openLootbox("Loot bag")}),
   
 ]
 function updateWallet() {
@@ -95,12 +89,12 @@ setInterval(() => {
 },1000)
 
 let rarity={
-  common: {id: 1, chance: 1.00, color: "#99ff91"},
-  uncommon: {id: 2, chance: 0.5, color: "#91aeff"},
-  rare: {id: 3, chance: 0.3, color: "#91ffe5"},
-  unique: {id: 4, chance: 0.1, color: "#cd91ff"},
-  extraordinary: {id: 5, chance: 0.05, color: "#e2ff70"},
-  rngesus: {id: 6, chance:0.025, color: "#f728c3"}
+  common: {id: 1, chance: 1.00, color: "#FFFFFF"},
+  uncommon: {id: 2, chance: 0.5, color: "#B9F18C"},
+  rare: {id: 3, chance: 0.3, color: "#9EBDE6"},
+  unique: {id: 4, chance: 0.1, color: "#ED6A5A"},
+  extraordinary: {id: 5, chance: 0.05, color: "#9B7EDE"},
+  rngesus: {id: 6, chance:0.025, color: "#FF2ECC"}
 }
 class lootbox_class {
   constructor(name,loot_array) {
@@ -108,14 +102,12 @@ class lootbox_class {
     this.loot_array=loot_array;
   }
   getLoot(seed=Math.random()) {
-    console.log("lootara");
+    //console.log("lootara");
     for(var i = this.loot_array.length-1; i >= 0; i--) {
-      
-      
       if(this.loot_array[i].chance>=seed || i==0) {
         i=loot_info.items.get(this.loot_array[i].id)
         i=i[Math.floor(Math.random() * i.length)]
-        console.log("seed: " + seed);
+        //console.log("seed: " + seed);
         return (i)
       }
     }
@@ -149,13 +141,12 @@ function initLootbox() {
 
   
   loot_info.loot = [
-    new loot_class(rarity.common,       "Clicky",       "Clicks for you every second!",          () => {this.add_item()}),
-    new loot_class(rarity.common,       "Mason",       "Mason make your click strong.",          () => {this.add_item()}),
-    new loot_class(rarity.uncommon,       "Pup figure",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
-    new loot_class(rarity.rare,       "Potion",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
-    new loot_class(rarity.unique,       "Brew",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
-    new loot_class(rarity.extraordinary,       "Karambit",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
-    new loot_class(rarity.rngesus,       "Vice gloves",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
+    new loot_class(rarity.common,       "Common",       "Clicks for you every second!",          () => {this.add_item()}),
+    new loot_class(rarity.uncommon,       "Uncommon",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
+    new loot_class(rarity.rare,       "Rare",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
+    new loot_class(rarity.unique,       "Unique",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
+    new loot_class(rarity.extraordinary,       "Extraordinary",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
+    new loot_class(rarity.rngesus,       "Rngesus",       "It's kinda useless since you can't see it.",          () => {this.add_item()}),
     
     
   ],
@@ -172,47 +163,120 @@ function initLootbox() {
 }
 function updateSpinningItems() {
   lootbox_item=document.getElementsByClassName("lootbox-item")
-  for(var i = 0; i < lootbox_items-1; i++) {
-    lootbox_item[i].innerHTML=lootbox_item[i+1].innerHTML;
+  console.log("UPDATING ITEMS");
+  for(var i = lootbox_items-1; i > 0; i--) {
+    lootbox_item[i].innerHTML=lootbox_item[i-1].innerHTML;
   }
   cur_item=cur_lootbox_opening.getLoot()
-  console.log("cur",cur_item);
-  lootbox_item[lootbox_items-1].innerHTML=
+  //console.log("cur",cur_item);
+  lootbox_item[0].innerHTML=
   `
   <div class="item-name" style="background-color: ${cur_item.rarity.color}"}>
   ${cur_item.name}
   </div>
   `
 }
-let animation_duration=2;
-let p_left=36.5
-var cur_p=36.5;
+let animation_duration=0.2;
+let animation_dur_increase=0.0005
+var cur_p=0;
+let animation_state=-1
 function animateLootbox() {
-  //elements.spinner.style.transition="padding-left "+animation_duration+"s linear";
+  if (stopLootbox==true) { return; }
+  lootboxAnimationToggle()
   setTimeout(() => {
+    if (stopLootbox==true) { return; }
+    lootboxAnimationToggle()
     updateSpinningItems();
-    animateLootbox();
+    setTimeout(() => {
+      animateLootbox();
+      if (stopLootbox==true) { return; }
+      updateSpinningItems();
+    }, animation_duration*1000)
   },animation_duration*1000)
 }
+let minimum_duration=1;
+let stop_at;
+let cur_padding={ left: 0, right: 0, changing: 0}
+let middle_item=5;
+function lootboxAnimationToggle() {
+  animation_state*=-1
+  animation_duration*=1+animation_dur_increase
+  animation_dur_increase*=1.4+((Math.random()-0.5)*0.25)
+  if (animation_state==1) {
+    elements.spinner.style.transition="padding-left 0s linear, padding-right "+animation_duration+"s linear";
+    cur_padding.left=0;
+    cur_padding.right=0;
+    cur_padding.changing=1;
+  }else {
+    elements.spinner.style.transition="padding-left "+animation_duration+"s linear, padding-right 0s linear";
+    cur_padding.left=36.5;
+    cur_padding.right=36.5;
+    cur_padding.changing=0;
+  }
+  elements.spinner.style.paddingLeft=cur_padding.left+"%";
+    elements.spinner.style.paddingRight=cur_padding.right+"%";
+  if (animation_duration>=minimum_duration) {
+    stop_at_time=(0.2+Math.random()*0.6)*animation_duration
+    if (stop_at_time>4) { stop_at_time=4 }
+    //console.log("!!! --------- STOPPING IN "+ stop_at_time +"s ---------- !!!")
+    setTimeout(() => {
+      lootboxStop();
+    },stop_at_time*1000)
+  }
+}
+function lootboxStop() {
+  //console.log("!!! --------- STOPPING NOW ---------- !!!")
+  
+  elements.spinner.style.transition="none";
+  if (cur_padding.changing==1) {
+    //console.log("NEW RIGHT = " + 36.5*((stop_at_time/animation_duration)))
+    elements.spinner.style.paddingRight=36.5*(1-(stop_at_time/animation_duration)) + "%"
+  }else {
+    //console.log("NEW LEFT = " + 36.5*(stop_at_time/animation_duration))
+    elements.spinner.style.paddingLeft=36.5*((stop_at_time/animation_duration)) + "%"
+  }
+  elements.spinner_wrapper.classList.toggle("spinner-open");
+  elements.shop_wrapper.classList.toggle("shop-open");
+  alert("You got:" + lootboxGetItem().replace(/\n|\r/g, "") + "!");
+  setTimeout(() => {
+    stopLootbox=true;
+  },1000)
+}
+function lootboxGetItem() {
+  return (elements.spinner.children[middle_item].children[0].innerHTML)
+}
 let lootbox_item, cur_item, seed;
-let lootbox_items=8
+let stopLootbox=true;
+let lootbox_items=10
 let cur_lootbox_opening=-1;
+
+function lootboxAnimation() {
+  minimum_duration=2+(Math.random()-0.275)*3
+  cur_padding={ left: 0, right: 0, changing: 0}
+  animation_state=-1
+  animation_duration=0.2
+  animation_dur_increase=0.0005
+  console.log("min dur: ", minimum_duration)
+  animateLootbox();
+}
 function openLootbox(lootbox_name) {
   lootbox=getLootbox(lootbox_name)
-  console.log("lootbox", lootbox)
-  if (cur_item==-1) { return -1 }
+  if (stopLootbox==false || lootbox==-1) { return -1 }
+  // so you cant open a lootbox while one is opening currently and you cant open an undefined lootbox
+  
+  stopLootbox=false
   cur_lootbox_opening=lootbox;
-  animateLootbox();
   elements.spinner_wrapper.classList.toggle("spinner-open");
   elements.shop_wrapper.classList.toggle("shop-open");
   while (elements.spinner.firstChild) {
     elements.spinner.removeChild(elements.spinner.lastChild);
   }
   for(var i = 0; i < lootbox_items; i++) {
+    console.log(i);
     lootbox_item = document.createElement("div");
     lootbox_item.className="lootbox-item"
     cur_item=lootbox.getLoot()
-    console.log("GOT: ", cur_item);
+    //console.log("GOT: ", cur_item);
     lootbox_item.innerHTML=
     `
     <div class="item-name" style="background-color: ${cur_item.rarity.color}"}>
@@ -220,8 +284,10 @@ function openLootbox(lootbox_name) {
     </div>
     `
     elements.spinner.append(lootbox_item)
+    console.log("---", i);
   }
-  
+  console.log("---", i);
+  lootboxAnimation()
 }
 function getLootbox(lootbox_name) {
   for(var i = 0; i < loot_info.boxes.length; i++) {
