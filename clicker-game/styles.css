@@ -186,6 +186,52 @@ body {
   padding-left:36.5%;
   transition: padding-right 1s, padding-left 0s;
 }
+#loot-card {
+  border:white 10px solid;
+  border-radius: 10px;
+  height:clamp(30vh,auto,75vh);
+  width:50vw;
+  top: 0;
+  position:absolute;
+  z-index: 1000;
+  transform: translateY(-50%) scale(0);
+  background-color: #000000;
+  outline-color: black;
+  outline-width:  thick;
+  outline-style: solid;
+  transition: transform 0.33s ease-out;
+
+  padding:2%;
+  font-size:2em;
+  color:white;
+  text-align: center;
+
+  user-select: none;
+}
+.loot-card-button {
+  background: rgba(0, 0, 0, 0);
+  outline: none;
+  border: 3px white solid;
+  border-radius: 10px;
+  width:15%;
+  color: white;
+  aspect-ratio: 3/1;
+  transition: background-color 0.33s;
+  cursor:pointer;
+}
+.loot-card-button:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+.loot-card-description, .loot-card-button  {
+  margin-top:2%;
+}
+.loot-card-rarity {
+  font-size:50%;
+}
+#loot-card.show-loot {
+  transform: translateY(-50%) scale(1);
+  
+}
 .spinner-open {
   transform: scaleX(100%) !important;
   transition-delay: 0.2s !important;
