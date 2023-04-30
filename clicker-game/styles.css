@@ -63,13 +63,20 @@ body {
   display: inline-block;
   margin:1%;
 }
+.inventory-title {
+  font-size:2em;
+  border-bottom: 10px solid black;
+  border-left: 10px solid black;
+  border-radius: 0px 0px 0px 10px;
+}
 #shop-list {
   width: 45%;
   display:inline-block;
 }
-
+.middle-item {
+  border-color: red !important;
+}
 #shop-wrapper {
-  padding-top: 1%;
   max-height:40%;
   overflow-y:scroll;
   overflow-x:visible;
@@ -77,7 +84,7 @@ body {
   bottom:0;
   position:absolute;
 
-
+  
   
   border-top: black 10px solid;
   border-radius: 10px;
@@ -119,6 +126,7 @@ body {
   border-radius: 5px;
   min-height:40px;
   user-select: none;
+  margin-top:2%;
 }
 .shop-item > * {
   font-size:clamp(0.75em,1vw,1vw);
@@ -144,6 +152,7 @@ body {
   box-shadow: inset 1px 1px 0px 0px black;
 }
 #bottom-wrapper {
+  user-select: none;
   position:absolute; 
   bottom: 0px;
   left: 0px;
