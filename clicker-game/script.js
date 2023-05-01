@@ -18,13 +18,21 @@ addEventListener("mouseup", () => {
 
 // Class for a shop item.
 class shop_item {
-  constructor(name,description, price,on_buy) {
+  constructor(name,description, price, price_increase, on_buy, lootbox="") {
     this.name=name;
     this.desc=description
     this.price=price;
+    this.price_increase=price_increase
     this.on_buy=on_buy
     this.bought=0;
     this.id=0
+    if (lootbox!="") {
+      this.lootbox=getLootbox(lootbox)
+      
+      console.log("xxx Lootbox:" + this.lootbox)
+    }else {
+      this.lootbox="";
+    }  
   }
 }
 
@@ -35,9 +43,30 @@ class lootbox_class {
     this.loot_array=loot_array;
   }
   getLoot(seed=Math.random()) {
+    // we pick a seed between 0 and 1.
+    // then we loop through our loot_array and pick a chance that falls in that seed range.
+    // if we get a seed of 0.7 and a chance for the most rare item in that lootbox is 0.01, then we move onto the next rarity
+    // we add the next rarities chance to the previous one, and we check if that's in the seed range
+    // we repeat that until we get a value that's more than the seed.
+    // then we return a random item for an array which has all the possible items sorted by rarities.
+
+    var cur_seed_range=0;
+    console.log("= = = = = = = = = = = = = = = = = = = = = =")
     for(var i = this.loot_array.length-1; i >= 0; i--) {
-      if(this.loot_array[i].chance>=seed || i==0) {
-        i=loot_info.item_rarities.get(this.loot_array[i].id)
+      cur_seed_range+=this.loot_array[i][1]*luck // [i][1] is the item's chance, so we add it to the cur seed range.
+      console.log(i, " - - - - - - - - - - - - - - - - - - - - - -")
+      console.log("CUR RARITY: " + rarity_names[this.loot_array[i][0].id])
+      console.log("CUR CHANCE: " + this.loot_array[i][1]*luck)
+      console.log("CUR SEED RANGE: " + cur_seed_range)
+      console.log("CUR SEED: " + seed)
+      
+      
+      
+      // "i==0" is the worst rarity in the array
+      // the "|| i == 0" acts as a fallback if we already looped through the whole array of rarities and the seed is still out of range due to some mistake.
+      if(cur_seed_range>=seed || i==0) { 
+        console.log("*** *** *** RARITY = " + rarity_names[this.loot_array[i][0].id]) + " *** *** ***"
+        i=loot_info.item_rarities.get(this.loot_array[i][0].id)
         i=i[Math.floor(Math.random() * i.length)]
         return (i)
       }
@@ -74,7 +103,7 @@ class loot_class {
 
 //#region[3] All variables are declared here
 
-let animation_timeout, unboxed_item, cur, elements, pos, stop_at, inventory_item, seed, cur_item, lootbox_item;
+let animation_timeout, unboxed_item, cur, elements, pos, stop_at, inventory_item, seed, cur_item, lootbox_item, shop_items;
 
 let money=0; // Starting money
 let money_per_click=0.01; // Money gained per click
@@ -84,8 +113,10 @@ let money_per_second_passive=0; // Passive money gained per second
 
 let buttonPressed=false; // Variable to keep track button being pressed down.
 
+let luck=1;
+
 let rarity={ // All rarities in the game (Sorted from least rare to most rare)
-  common: {id: 0, chance: 1.00, color: "#FFFFFF"},
+  common: {id: 0, chance: 1.00, color: "#C0C0C0"},
   uncommon: {id: 1, chance: 0.4, color: "#B9F18C"},
   rare: {id: 2, chance: 0.125, color: "#9EBDE6"},
   unique: {id: 3, chance: 0.033, color: "#ED6A5A"},
@@ -129,26 +160,19 @@ for(var i = 0; i < Object.keys(rarity).length; i++) {
   loot_info.item_rarities.set(i,[]);
 }
 
-let shop_items=[
-  new shop_item("Better clicks","Get $0.01 more per click!", 0.15,() => {money_per_click+=0.01}),
-  new shop_item("Auto clicks","Get $0.05 per second!", 0.49,() => {money_per_second+=0.05}),
-  new shop_item("Trashbag","Open a Trashbag!", 0.99,() => {openLootbox("Trashbag")}),
-  new shop_item("Starter box","Open a Starter box!", 2.99,() => {openLootbox("Starter box")}),
-  new shop_item("Lootbag","Open a Lootbag!", 9.99,() => {openLootbox("Lootbag")}),
-  new shop_item("Snackbox","Open a Snackbox!", 19.99,() => {openLootbox("Snackbox")}),
-  new shop_item("Gamma 2 Case","Open a Gamma 2 Case!", 49.99,() => {openLootbox("Gamma 2 Case")}),
-]
-
 //#endregion
 
 /*
 = TO DO =
-1. MAKE SO EVERY ITEM NAME IS CONVERETED INTO QUESTION MARKS INSIDE THE SPINNER
-- WITH "Compliment" BECOMING "??????????" UNTIL THE PLAYER OPENS IT FOR THE FIRST TIME
-- THEN IT JUST SHOWS UP NORMALLY
-2. ADD CUSTOMIZABLE ODDS FOR EVERY LOOT BOX 
+1. IF (SHOP ITEM == LOOTBOX) { ON HOVER = SHOW ODDS OF LOOTBOX }
 
 */
+
+function addLuck(luck_amt) {
+  luck+=luck_amt;
+  updateInfo();
+  updateShopItems()
+}
 
 // #region[4] Game initialization
 
@@ -168,6 +192,18 @@ function gameInit() {
     info_div: document.getElementById("info-div")
   }
 
+  initLootbox();
+
+  shop_items=[
+    new shop_item("Better clicks","Get $0.01 more per click!", 0.15,1.66,() => {money_per_click+=0.01}),
+    new shop_item("Auto clicks","Get $0.05 per second!", 0.5,1.66,() => {money_per_second+=0.05}),
+    new shop_item("Trash bag","Open a Trash bag!", 0.99,1.1,() => {openLootbox("Trash bag")}, "Trash bag"),
+    new shop_item("Starter box","Open a Starter box!", 2.99,1.1,() => {openLootbox("Starter box")}, "Starter box"),
+    new shop_item("Greedy box","Open a Greedy box!", 9.99,1.1,() => {openLootbox("Greedy box")}, "Greedy box"),
+    new shop_item("Mystery box","Open a Mystery box!", 19.99,1.1,() => {openLootbox("Mystery box")}, "Mystery box"),
+    new shop_item("Loot bag","Open a Loot bag!", 49.99,1.1,() => {openLootbox("Loot bag")}, "Loot bag"),
+  ]
+
   // Adding all the shop buttons
   for(var i = 0; i < shop_items.length; i++) {
     cur=document.createElement("div")
@@ -178,7 +214,6 @@ function gameInit() {
     elements.shop.append(cur)
   }
 
-  initLootbox();
   updateInfo();
 }
 
@@ -189,51 +224,98 @@ function initLootbox() {
   // The format for adding new loot:
   // "new loot_class(rarity,      name,     description,    item type,     function that's run when the item is bought)"
   loot_info.loot = [
-    new loot_class(rarity.common,       "W shard",       "A mysterious shard, I wonder what does it spell out? [+5% $ per click]",type.onetime,          () => {money_per_click*=1.05}),
-    new loot_class(rarity.common,       "A shard",       "A mysterious shard, I wonder what does it spell out? [+5% $ per second]",type.onetime,          () => {money_per_second*=1.05}),
-    new loot_class(rarity.common,       "N shard",       "A mysterious shard, I wonder what does it spell out? [+2.5% $ per click]",type.onetime,          () => {money_per_click*=1.025}),
-    new loot_class(rarity.common,       "S shard",       "A mysterious shard, I wonder what does it spell out? [+2.5% $ per second]",type.onetime,          () => {money_per_second*=1.025}),
-    new loot_class(rarity.common,       "O shard",       "A mysterious shard, I wonder what does it spell out? [+1% $ per click]",type.onetime,          () => {money_per_click*=1.01}),
-    new loot_class(rarity.common,       "U shard",       "A mysterious shard, I wonder what does it spell out? [+1% $ per second]",type.onetime,          () => {money_per_second*=1.01}),
+    new loot_class(rarity.common,       "W shard",       "A mysterious shard, I wonder what does it spell out? [+5% $ per click] [+1% Luck]",type.onetime,          () => {money_per_click*=1.05; luck+=0.01}),
+    new loot_class(rarity.common,       "A shard",       "A mysterious shard, I wonder what does it spell out? [+5% $ per second] [+1% Luck]",type.onetime,          () => {money_per_second*=1.05; luck+=0.01}),
+    new loot_class(rarity.common,       "N shard",       "A mysterious shard, I wonder what does it spell out? [+2.5% $ per click] [+1% Luck]",type.onetime,          () => {money_per_click*=1.025; luck+=0.01}),
+    new loot_class(rarity.common,       "S shard",       "A mysterious shard, I wonder what does it spell out? [+2.5% $ per second] [+1% Luck]",type.onetime,          () => {money_per_second*=1.025; luck+=0.01}),
+    new loot_class(rarity.common,       "O shard",       "A mysterious shard, I wonder what does it spell out? [+1% $ per click] [+1% Luck]",type.onetime,          () => {money_per_click*=1.01; luck+=0.01}),
+    new loot_class(rarity.common,       "U shard",       "A mysterious shard, I wonder what does it spell out? [+1% $ per second] [+1% Luck]",type.onetime,          () => {money_per_second*=1.01; luck+=0.01}),
     
-    new loot_class(rarity.uncommon,       "Snackbar",       "You aren't yourself when you're hungry, have a Snackbar. [+15% $ per click]",type.consumable,          () => {money_per_click*=1.15}),
-    new loot_class(rarity.uncommon,       "Coffee",       "Makes your money production caffeinated! [+15% $ per second]",type.consumable,          () => {money_per_second*=1.15}),
-    new loot_class(rarity.uncommon,       "Souvenir",       "It's a souvenir from that one time, it gains value every second because of how old it is. [+0.1$ per second]",type.onetime,          () => {money_per_second+=0.5}),
-    new loot_class(rarity.uncommon,       "Vape",       "It decreases your life span by 25% but increases something I think. [+5% passive $ per second]",type.passive,          () => {money_per_second_passive+=0.05; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.uncommon,       "Warm blanket",       "Makes you all cozy! [+5% passive $ per click]",type.passive,          () => {money_per_click_passive+=0.05; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.common,       "Kid`s hat",  "It's one of those tall top hats,  [+0.01$ per click]",type.onetime,          () => {money_per_click+=0.01}),
+    new loot_class(rarity.common,       "Blank badge",  "People collect those things I guess [+0.01$ per second]",type.onetime,          () => {money_per_second+=0.01}),
     
-    new loot_class(rarity.rare,       "Sock",       "You know what you have to do... [+33% per click]",type.onetime,          () => {money_per_click*=1.33}),
-    new loot_class(rarity.rare,       "Gun",       "We recommend at least 6 guns for self protection. [+10% passive $ per click] [+10% passive $ per second]",type.passive,          () => {money_per_click_passive+=0.1; money_per_second_passive+=0.1; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.rare,       "Compliment",       "You got your yearly compliment! [+10% $ per second] [+10% passive $ per second]",type.passive,          () => {money_per_second*=1.1; money_per_second_passive+=0.1; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.rare,       "Pen",       "Sell this pen to the right person and you'll make millions! [+$2.5 per click] [+15% $ per click] [+10% passive $ per click]",type.passive,          () => {money_per_click+=2.5; money_per_click*=1.15; money_per_click_passive+=0.1; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.rare,       "Chicken nugget",       "It makes you want to make money. [+33% $ per second]",type.consumable,          () => {money_per_second*=1.33}),
+    
+    new loot_class(rarity.uncommon,       "Snackbar",       "You aren't yourself when you're hungry, have a Snackbar. [+0.05$ per click]",type.onetime ,          () => {money_per_click+=0.05}),
+    new loot_class(rarity.uncommon,       "Coffee",       "Makes your money production caffeinated! [+10% $ per second]",type.consumable,          () => {money_per_second*=1.15}),
+    new loot_class(rarity.uncommon,       "Souvenir",       "It's a souvenir from that one time, it gains value every second because of how old it is. [+0.1$ per second] [+2.5% Luck]",type.onetime,          () => {money_per_second+=0.1; luck+=0.025}),
+    new loot_class(rarity.uncommon,       "Vape",       "It decreases your life span by 25% but increases something I think. [+2.5% passive $ per second] [+2.5% Luck]",type.passive,          () => {money_per_second_passive+=0.05; luck+=0.025; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.uncommon,       "Warm blanket",       "Makes you all cozy! [+2.5% passive $ per click] [+2.5% Luck]",type.passive,          () => {money_per_click_passive+=0.05; luck+=0.025; addItemToInventory(unboxed_item)}),
+    
+    new loot_class(rarity.uncommon,       "Sprint Hat",  "This hat looks ready to sprint! [+0.1$ per click]",type.onetime,          () => {money_per_click+=0.1}),
+    new loot_class(rarity.uncommon,       "Money badge",  "Supposedly makes you rich [+0.15$ per second]",type.onetime,          () => {money_per_second+=0.1}),
+    
 
+    new loot_class(rarity.rare,       "Sock",       "You know what you have to do... [+10% $ per click] [+5% Luck]",type.onetime,          () => {money_per_click*=1.1; luck+=0.05}),
+    new loot_class(rarity.rare,       "Gun",       "We recommend at least 6 guns for self protection. [+5% passive $ per click] [+5% passive $ per second]",type.passive,          () => {money_per_click_passive+=0.05; money_per_second_passive+=0.05; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.rare,       "Compliment",       "You got your yearly compliment! [+10% $ per second] [+2.5% passive $ per second] [+5% Luck]",type.passive,          () => {money_per_second*=1.1; money_per_second_passive+=0.025; luck+=0.05; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.rare,       "Pen",       "Sell this pen to the right person and you'll make millions! [+$0.2 per click] [+5% Luck]",type.onetime,          () => {money_per_click+=0.2; luck+=0.05}),
+    new loot_class(rarity.rare,       "Chicken nugget",       "It makes you want to make money. [+$0.15 per second] [+10% $ per second]",type.consumable,          () => {money_per_second+=0.15; money_per_second*=1.1}),
+    
+    new loot_class(rarity.rare,       "Brewing Hat",  "Cook up mad concoctions!  [+0.2$ per click]",type.onetime,          () => {money_per_click+=0.2}),
+    new loot_class(rarity.rare,       "Tranquillity badge",  "It is neither wealth nor splendor, but tranquility and occupation which give you happiness. [+20% Luck]",type.onetime,          () => {luck+=0.2}),
+    
 
-    new loot_class(rarity.unique,       "Golden frying pan",       "Imbued with an ancient power. [+200% $ per click]",type.consumable,          () => {money_per_click*=3}),
-    new loot_class(rarity.unique,       "Karambit | Fade",       "This isn't just a weapon, it's a conversation piece. [+100% passive $ per click]",type.passive,          () => {money_per_click_passive+=1; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.unique,       "Ice cream",       "It's your favourite flavour! [+100$ per click]",type.onetime,          () => {money_per_click+=100}),
-    new loot_class(rarity.unique,       "Dictionary 2",       "It's the sequel to the Dictionary! [75% passive $ per click] [+75% passive $ per second]",type.passive,          () => {money_per_click_passive+=0.75; money_per_second_passive+=0.75; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.unique,       "Fanart of you",       "Wow it looks great, wish you could see it! [+100% passive $ per second]",type.passive,          () => {money_per_second_passive+=1; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.unique,       "Golden frying pan",       "Imbued with an ancient power. [+33% $ per click] [+15% Luck]",type.consumable,          () => {money_per_click*=1.33; luck+=0.15}),
+    new loot_class(rarity.unique,       "Karambit | Fade",       "This isn't just a weapon, it's a conversation piece. [+15% passive $ per second] [+15% Luck]",type.passive,          () => {money_per_second_passive+=0.15; luck+=0.15; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.unique,       "Ice cream",       "It's your favourite flavour! [+0.75$ per click]",type.onetime,          () => {money_per_click+=0.75}),
+    new loot_class(rarity.unique,       "Dictionary 2",       "It's the sequel to the Dictionary! [5% passive $ per click] [+7.5% passive $ per second]",type.passive,          () => {money_per_click_passive+=0.05; money_per_second_passive+=0.075; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.unique,       "Fanart of you",       "Wow it looks great, wish you could see it! [+10% passive $ per click]",type.passive,          () => {money_per_click_passive+=0.1; addItemToInventory(unboxed_item)}),
     
-    new loot_class(rarity.extraordinary,       "Existential crisis",       "Jeez. [+250$ per second]",type.onetime,          () => {money_per_second+=250}),
-    new loot_class(rarity.extraordinary,       "Autism",       "Well I don't think that's perticularly bad. [+333% $ per click]",type.onetime,          () => {money_per_click*=4.33}),
-    new loot_class(rarity.extraordinary,       "Puppy Frank",       "He's the cutest pup I've ever seen, attracts loads of girls. [+333% passive $ per second]",type.passive,         () => {money_per_second_passive+=3.33; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.extraordinary,       "The license to WinRar",       "I forgot that existed. [+175% passive $ per click] [+200% passive $ per second]",type.passive,          () => {money_per_click_passive+=1.75; money_per_second_passive+=2; addItemToInventory(unboxed_item)}),
-    new loot_class(rarity.extraordinary,       "Probably not flour",       "It's probably just flour. [100$ per click] [+250% $ per click]",type.consumable,          () => {money_per_click+=100; money_per_click*=3.5;}),
+    new loot_class(rarity.unique,       "Ice Hat",  "It's so cold! [+1$ per click]",type.onetime,          () => {money_per_click+=1}),
+    new loot_class(rarity.unique,       "Misprinted badge",  "It gains value because the manufacturers fucked up [+1.25$ per second]",type.onetime,          () => {money_per_second+=1.25}),
     
-    new loot_class(rarity.rngesus,       "Wan",       "The ying of yang [+1000$ per click] [+1000% $ per click]",type.onetime,          () => {money_per_click+=1000; money_per_click*=11}),
-    new loot_class(rarity.rngesus,       "Sou",       "The yang of ying [+1000$ per second] [+1000% $ per second]",type.onetime,          () => {money_per_second+=1000; money_per_second*=11}),
+
+    new loot_class(rarity.extraordinary,       "Existential crisis",       "Jeez. [+3.33$ per second]",type.onetime,          () => {money_per_second+=3.33}),
+    new loot_class(rarity.extraordinary,       "Autism",       "Well I don't think that's perticularly bad. [+100% $ per click]",type.onetime,          () => {money_per_click*=2}),
+    new loot_class(rarity.extraordinary,       "Puppy Frank",       "He's the cutest pup I've ever seen, attracts loads of girls. [+50% passive $ per second]",type.passive,         () => {money_per_second_passive+=0.5; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.extraordinary,       "The license to WinRar",       "I forgot that existed. [+20% passive $ per click] [+30% passive $ per second]",type.passive,          () => {money_per_click_passive+=0.2; money_per_second_passive+=0.3; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.extraordinary,       "Probably not flour",       "It's probably just flour. [2$ per click] [+50% $ per click]",type.consumable,          () => {money_per_click+=2; money_per_click*=1.5;}),
+    
+    new loot_class(rarity.extraordinary,       "Dweller`s mask",  "See the world through a Dweller's eyes! [+3.33$ per click]",type.onetime,          () => {money_per_click+=3.33}),
+    new loot_class(rarity.extraordinary,       "Hourglass",  "Does weird things with time [+5$ per second]",type.onetime,          () => {money_per_second+=5}),
+    
+    new loot_class(rarity.rngesus,       "Wan",       "The ying of yang [+100$ per click] [+100% passive $ per click]",type.onetime,          () => {money_per_click+=100; money_per_click_passive+=1}),
+    new loot_class(rarity.rngesus,       "Sou",       "The yang of ying [+100$ per second] [+100% passive $ per second]",type.onetime,          () => {money_per_second+=100; money_per_second_passive+=1}),
+    new loot_class(rarity.rngesus,       "Time stop hat",  "Death is inevitable. Your time is valuable. [+1000$ per click]",type.onetime,          () => {money_per_click+=1000})
     
   ],
   // Here are all the boxes in the game
   // The format for adding a new box:
   // new lootbox_class(name,      [rarities sorted from lowest to highest])
   loot_info.boxes = [
-    new lootbox_class("Trashbag", [rarity.common, rarity.uncommon]),
-    new lootbox_class("Starter box",[rarity.common,  rarity.uncommon,  rarity.rare]),
-    new lootbox_class("Lootbag",[rarity.common, rarity.uncommon, rarity.rare, rarity.unique, rarity.extraordinary, rarity.rngesus]),
-    new lootbox_class("Snackbox",[rarity.rare, rarity.unique, rarity.extraordinary, rarity.rngesus]),
-    new lootbox_class("Gamma 2 Case",[rarity.unique, rarity.extraordinary, rarity.rngesus])
+    new lootbox_class("Trash bag", [
+      [rarity.common, 0.75],
+      [rarity.uncommon, 0.25]
+    ]),
+
+    new lootbox_class("Starter box",[
+      [rarity.common, 0.5],
+      [rarity.uncommon,0.45],
+      [rarity.rare,0.05]
+    ]),
+
+    new lootbox_class("Greedy box",[
+      [rarity.common,0.9],
+      [rarity.rare,0.09],
+      [rarity.unique,0.01]
+    ]),
+
+    new lootbox_class("Mystery box",[
+      [rarity.common,0.65],
+      [rarity.uncommon,0.15],
+      [rarity.rare,0.12],
+      [rarity.unique,0.05],
+      [rarity.extraordinary,0.02],
+      [rarity.rngesus,0.01]
+    ]),
+    
+    new lootbox_class("Loot bag",[
+      [rarity.uncommon,0.5],
+      [rarity.rare,0.3],
+      [rarity.unique,0.1], 
+      [rarity.extraordinary,0.09], 
+      [rarity.rngesus,0.01]
+    ])
     
   ]
 }
@@ -288,6 +370,14 @@ function updateShopItems() {
     // Set the inner HTML of that child element to the values specificed in the shop_items array
     childEl.innerHTML=getShopHTML(shop_items[childEl.getElementsByTagName("button")[0].style.getPropertyValue("--button-id")])
 
+    // Set the shops onhover event
+    /*
+    console.log("yeah");
+    childEl.addEventListener("mouseover", onHover(true));
+    childEl.addEventListener("mouseout", onHover(false));
+    console.log("added");
+    */
+
     // Set the button to have a click event
     childEl.getElementsByTagName("button")[0].onclick=onBuy;
   }
@@ -308,13 +398,16 @@ function getInfoHTML() {
   `
   <div class="info">
     Money per click: $${(money_per_click + money_per_click * money_per_click_passive).toFixed(2)}
-    <span class="test-info">Raw money per click: $${money_per_click.toFixed(2)}</span>
-    <span class="test-info">Passive money per click: $${(money_per_click_passive*money_per_click).toFixed(2)}</span>
+    <span class="test-info">Raw money per click: $${money_per_click.toFixed(3)}</span>
+    <span class="test-info">${(money_per_click_passive*100).toFixed(2)}% Passive money per click: $${(money_per_click_passive*money_per_click).toFixed(3)}</span>
   </div>
   <div class="info">
     Money per second: $${(money_per_second + money_per_second * money_per_second_passive).toFixed(2)}
-    <span class="test-info">Raw money per second: $${money_per_second.toFixed(2)}</span> 
-    <span class="test-info">Passive money per second: $${(money_per_second_passive*money_per_second).toFixed(2)}</span> 
+    <span class="test-info">Raw money per second: $${money_per_second.toFixed(3)}</span> 
+    <span class="test-info">${(money_per_second_passive*100).toFixed(2)}% Passive money per second: $${(money_per_second_passive*money_per_second).toFixed(3)}</span> 
+  </div>
+  <div class="info">
+    Luck: +${((luck-1)*100).toFixed(2)}%
   </div>
   `
   )
@@ -332,7 +425,41 @@ function getShopHTML(item) {
     <span class="shop-item-price item-right">$${item.price.toFixed(2)}</span>
     <span class="shop-item-desc item-left">${item.desc}</span>
     <button class="shop-item-button item-right" style="--button-id:${item.id};">BUY</button>
-  `)
+    <div class="shop-hover">${getShopHoverHTML(item)}<div> 
+  `)  
+}
+function getPieChartHTML(loot_array) {
+  var _c = 0
+  var _html=""
+  for(var i = loot_array.length-1; i >= 0; i--) {
+    _c+=loot_array[i][1]*100
+    _html+=`${loot_array[i][0].color} 0,`
+    _html+=`${loot_array[i][0].color} ${_c*luck}%,`
+    
+  }
+  console.log("S HTML: ", _html.slice(0, -1) )
+  return(_html.slice(0, -1) )
+}
+function getShopHoverHTML(item) {
+  // If the current shop item is not a lootbox, return ""
+  if (item.lootbox=="") { return ""; }
+  console.log("cur_rarities ", item.lootbox.loot_array)
+  var html=`<div class="shop-hover-inner" `;
+  /*for(var i = 0; i < item.lootbox.loot_array.length; i++) {
+    console.log("chance: ", item.lootbox.loot_array[i][1] * 100);
+    html+=`<span class="shop-hover-rarity">${item.lootbox.loot_array[i][1] * 100}% | ${rarity_names[item.lootbox.loot_array[i][0].id]}</span>`
+  }
+  */
+  html+=`style="background:
+    radial-gradient(
+      circle closest-side,
+      transparent 66%,
+      white 0
+    ),
+    conic-gradient(${getPieChartHTML(item.lootbox.loot_array)});"`
+  html+=`>loot chance</div>`
+  console.log("final html: ", html)
+  return(html);
 }
 
 function getPopupHTML(item) {
@@ -365,15 +492,19 @@ function getPopupHTML(item) {
 function onBuy() {
   // This function runs whenever a shop button is clicked
   // It checks if the money is enough to buy the item, and if we aren't currently opening a box
-  if (money>=shop_items[this.style.getPropertyValue("--button-id")].price && lootbox_opening==false) {
+  
+  var button_id=this.style.getPropertyValue("--button-id")
+  if (money>=shop_items[button_id].price && lootbox_opening==false) {
     // We then run the item's on_buy function
-    shop_items[this.style.getPropertyValue("--button-id")].on_buy();
+    shop_items[button_id].on_buy();
     // Remove the price from the money
-    money-=shop_items[this.style.getPropertyValue("--button-id")].price;
+    money-=shop_items[button_id].price;
     // Update the wallet element
     updateWallet();
     // Add 1 to the bought amount of the item
-    shop_items[this.style.getPropertyValue("--button-id")].bought++;
+    shop_items[button_id].bought++;
+    // Increase the item's price by the price increase amount
+    shop_items[button_id].price*=shop_items[button_id].price_increase;
     // Update the shop items to show up the new bought amount
     updateShopItems();
     // And lastly update the info HTML elements
@@ -396,6 +527,12 @@ function buttonPress() {
 //#region[8] Lootbox functions
 
 function openLootbox(lootbox_name) {
+  // Scroll the window to the top
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+
   // Getting the lootbox data
   lootbox=getLootbox(lootbox_name)
 
@@ -485,11 +622,14 @@ function showInventoryItem() {
 }
 
 // Function to get all the lootbox data by its name
-function getLootbox(lootbox_name) {
+function getLootbox(get_lootbox_name) {
+  console.log(">>>FINDING: ", get_lootbox_name)
   // Loop through all the boxes available
   for(var i = 0; i < loot_info.boxes.length; i++) {
     // if it matches the name, return it
-    if(loot_info.boxes[i].name==lootbox_name) {
+    console.log("FOUND", loot_info.boxes[i].name)
+    
+    if(loot_info.boxes[i].name==get_lootbox_name) {
       return (loot_info.boxes[i])
     }
   }
