@@ -73,9 +73,6 @@ body {
   width: 45%;
   display:inline-block;
 }
-.middle-item {
-  border-color: red !important;
-}
 #shop-wrapper {
   max-height:40%;
   overflow-y:scroll;
@@ -204,7 +201,7 @@ body {
   position:absolute;
   z-index: 1000;
   transform: translateY(-50%) scale(0);
-  background-color: #000000;
+  background-color: #000000e9;
   outline-color: black;
   outline-width:  thick;
   outline-style: solid;
@@ -217,6 +214,12 @@ body {
 
   user-select: none;
 }
+.loot-card-buttons {
+  margin:auto;
+  margin-top:5%;
+  display:flex;
+  justify-content: space-evenly;
+}
 .loot-card-button {
   background: rgba(0, 0, 0, 0);
   outline: none;
@@ -228,6 +231,37 @@ body {
   transition: background-color 0.33s;
   cursor:pointer;
 }
+#info-div {
+  position: absolute;
+  top:2%;
+  left: 1%;
+  height:11vh;
+  user-select: none;
+}
+.info {
+  height:10vh;
+  font-size: 4vh;
+}
+.test-info {
+  font-size: 2vh;
+  display:block;
+}
+
+.loot-card-stats {
+  font-size:0.75em;
+  display:block;
+  margin-top:5%;
+  margin-bottom:-5%;
+  text-shadow:
+    0 0 7px var(--clr),
+    0 0 10px var(--clr),
+    0 0 21px var(--clr),
+    0 0 42px var(--clr),
+    0 0 82px var(--clr),
+    0 0 92px var(--clr),
+    0 0 102px var(--clr),
+    0 0 151px var(--clr);
+}
 .loot-card-button:hover {
   background-color: rgba(255, 255, 255, 0.25);
 }
@@ -235,9 +269,10 @@ body {
   margin-top:2%;
 }
 .loot-card-rarity {
+  text-transform: uppercase;
   font-size:50%;
 }
-#loot-card.show-loot {
+#loot-card.open-card {
   transform: translateY(-50%) scale(1);
   
 }
