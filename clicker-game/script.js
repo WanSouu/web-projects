@@ -195,8 +195,8 @@ function gameInit() {
   initLootbox();
 
   shop_items=[
-    new shop_item("Better clicks","Get $0.01 more per click!", 0.15,1.66,() => {money_per_click+=0.01}),
-    new shop_item("Auto clicks","Get $0.05 per second!", 0.5,1.66,() => {money_per_second+=0.05}),
+    new shop_item("Better clicks","Get $0.01 more per click!", 0.15,1.33,() => {money_per_click+=0.01}),
+    new shop_item("Auto clicks","Get $0.05 per second!", 0.5,1.33,() => {money_per_second+=0.05}),
     new shop_item("Trash bag","Open a Trash bag!", 0.99,1.1,() => {openLootbox("Trash bag")}, "Trash bag"),
     new shop_item("Starter box","Open a Starter box!", 2.99,1.1,() => {openLootbox("Starter box")}, "Starter box"),
     new shop_item("Greedy box","Open a Greedy box!", 9.99,1.1,() => {openLootbox("Greedy box")}, "Greedy box"),
