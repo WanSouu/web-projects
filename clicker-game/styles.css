@@ -22,6 +22,8 @@ body {
   align-items: center;
   flex-direction: column;
   overflow-x:hidden;
+
+  background: white;
 }
 
 #top-wrapper {
@@ -50,26 +52,41 @@ body {
   height:90%;
   width:45%;
   position:absolute;
-  display:inline-block;
+  top:0;
   text-align: center;
   right:0;
 }
+
+#inventory-item-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  width:100%;
+  height:auto;
+}
+
 .inventory-item {
-  width:15%;
+  width:calc(20% - 8px);
   aspect-ratio: 1/1;
   border: 1px solid black;
+  margin: 3px;
   font-size:1em;
-  text-align: center;
-  display: inline-block;
-  margin:1%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0px 0px 20px 10px rgba(80, 80, 80, 0.33),
+  inset 0px 0px 5px 1px rgba(45, 45, 45,0.2),
+  inset 0px 0px 10px 15px rgba(0, 0, 0, 0.1);
+  background: white;
 }
 .inventory-title {
-  font-size:2em;
+  font-size:4vh;
   border-bottom: 10px solid black;
   border-left: 10px solid black;
   border-right: 10px solid black;
-  
+  background: white;
   border-radius: 0px 0px 10px 10px;
+  display:  block;
+  height:5vh;
 }
 #shop-list {
   width: 45%;
@@ -153,6 +170,8 @@ body {
   margin-top:2%;
   position:relative;
   transition: padding-bottom 0.33s ease-in;
+  background: white;
+  z-index:1;
 }
 .shop-item > * {
   font-size:clamp(0.75em,1vw,1vw);
@@ -169,6 +188,7 @@ body {
   z-index:1;
 }
 .shop-item-button {
+  z-index: 3 !important;
   cursor:pointer;
   height:55%;
   text-align: center !important;
@@ -228,8 +248,8 @@ body {
   border-radius: 10px;
   height:clamp(30vh,auto,75vh);
   width:50vw;
-  top: 0;
-  position:absolute;
+  top: 50vh;
+  position:fixed;
   z-index: 1000;
   transform: translateY(-50%) scale(0);
   background-color: #000000e9;
@@ -317,7 +337,8 @@ body {
   display: inline-block;
   height: 90%;
   aspect-ratio: 1/1;
-  border: 1px solid black;
+  border: 10px solid black;
+  border-width: 5px 0px
 }
 .item-name {
   font-family: OpenSans;
@@ -328,6 +349,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: inset 0px 0px 60px 30px rgba(80, 80, 80, 0.1),
+  inset 0px 0px 5px 1px rgba(45, 45, 45,0.2),
+  inset 0px 0px 50px 25px rgba(0, 0, 0, 0.33);
+    
 }
 @keyframes spin {
   0% {
@@ -353,7 +378,7 @@ body {
   font-size:clamp(2.5em, 5vw, 5vw);
   border: black solid 2px;
   border-radius: 0.5vw;
-  background: none;
+  background: white;
   color: black;
   transition: color 0.075s ease-in, background 0.075s ease-out, transform 0.075s ease-in, box-shadow 0.075s ease-in;
   user-select: none;

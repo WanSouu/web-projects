@@ -28,8 +28,6 @@ class shop_item {
     this.id=0
     if (lootbox!="") {
       this.lootbox=getLootbox(lootbox)
-      
-      console.log("xxx Lootbox:" + this.lootbox)
     }else {
       this.lootbox="";
     }  
@@ -51,21 +49,14 @@ class lootbox_class {
     // then we return a random item for an array which has all the possible items sorted by rarities.
 
     var cur_seed_range=0;
-    console.log("= = = = = = = = = = = = = = = = = = = = = =")
     for(var i = this.loot_array.length-1; i >= 0; i--) {
       cur_seed_range+=this.loot_array[i][1]*luck // [i][1] is the item's chance, so we add it to the cur seed range.
-      console.log(i, " - - - - - - - - - - - - - - - - - - - - - -")
-      console.log("CUR RARITY: " + rarity_names[this.loot_array[i][0].id])
-      console.log("CUR CHANCE: " + this.loot_array[i][1]*luck)
-      console.log("CUR SEED RANGE: " + cur_seed_range)
-      console.log("CUR SEED: " + seed)
       
       
       
       // "i==0" is the worst rarity in the array
       // the "|| i == 0" acts as a fallback if we already looped through the whole array of rarities and the seed is still out of range due to some mistake.
       if(cur_seed_range>=seed || i==0) { 
-        console.log("*** *** *** RARITY = " + rarity_names[this.loot_array[i][0].id]) + " *** *** ***"
         i=loot_info.item_rarities.get(this.loot_array[i][0].id)
         i=i[Math.floor(Math.random() * i.length)]
         return (i)
@@ -105,7 +96,7 @@ class loot_class {
 
 let animation_timeout, unboxed_item, cur, elements, pos, stop_at, inventory_item, seed, cur_item, lootbox_item, shop_items;
 
-let money=0; // Starting money
+let money=22220; // Starting money
 let money_per_click=0.01; // Money gained per click
 let money_per_second=0; // Money gained per second
 let money_per_click_passive=0; // Passive money per click 
@@ -187,7 +178,8 @@ function gameInit() {
     shop: document.getElementById("shop-list"),
     spinner: document.getElementById("lootbox-spinner"),
     spinner_wrapper: document.getElementById("lootbox-wrapper"),
-    inventory: document.getElementById("inventory-wrapper"),
+    inventory: document.getElementById("inventory-item-wrapper"),
+    inventory_wrapper: document.getElementById("inventory-wrapper"),
     popup_card: document.getElementById("loot-card"),
     info_div: document.getElementById("info-div")
   }
@@ -197,11 +189,13 @@ function gameInit() {
   shop_items=[
     new shop_item("Better clicks","Get $0.01 more per click!", 0.15,1.33,() => {money_per_click+=0.01}),
     new shop_item("Auto clicks","Get $0.05 per second!", 0.5,1.33,() => {money_per_second+=0.05}),
+    new shop_item("Luck enchancment","Get +5% luck!", 0.99,1.4,() => {luck+=0.05}),
     new shop_item("Trash bag","Open a Trash bag!", 0.99,1.1,() => {openLootbox("Trash bag")}, "Trash bag"),
-    new shop_item("Starter box","Open a Starter box!", 2.99,1.1,() => {openLootbox("Starter box")}, "Starter box"),
-    new shop_item("Greedy box","Open a Greedy box!", 9.99,1.1,() => {openLootbox("Greedy box")}, "Greedy box"),
-    new shop_item("Mystery box","Open a Mystery box!", 19.99,1.1,() => {openLootbox("Mystery box")}, "Mystery box"),
-    new shop_item("Loot bag","Open a Loot bag!", 49.99,1.1,() => {openLootbox("Loot bag")}, "Loot bag"),
+    new shop_item("Starter box","Open a Starter box!", 4.99,1.1,() => {openLootbox("Starter box")}, "Starter box"),
+    new shop_item("Pronto box","Open the Pronto box!", 9.99,1.1,() => {openLootbox("Pronto box")}, "Pronto box"),
+    new shop_item("Greedy box","Open a Greedy box!", 19.99,1.1,() => {openLootbox("Greedy box")}, "Greedy box"),
+    new shop_item("Mystery box","Open a Mystery box!", 49.99,1.1,() => {openLootbox("Mystery box")}, "Mystery box"),
+    new shop_item("Loot bag","Open a Loot bag!", 99.99,1.1,() => {openLootbox("Loot bag")}, "Loot bag"),
   ]
 
   // Adding all the shop buttons
@@ -274,8 +268,8 @@ function initLootbox() {
     new loot_class(rarity.extraordinary,       "Dweller`s mask",  "See the world through a Dweller's eyes! [+3.33$ per click]",type.onetime,          () => {money_per_click+=3.33}),
     new loot_class(rarity.extraordinary,       "Hourglass",  "Does weird things with time [+5$ per second]",type.onetime,          () => {money_per_second+=5}),
     
-    new loot_class(rarity.rngesus,       "Wan",       "The ying of yang [+100$ per click] [+100% passive $ per click]",type.onetime,          () => {money_per_click+=100; money_per_click_passive+=1}),
-    new loot_class(rarity.rngesus,       "Sou",       "The yang of ying [+100$ per second] [+100% passive $ per second]",type.onetime,          () => {money_per_second+=100; money_per_second_passive+=1}),
+    new loot_class(rarity.rngesus,       "Wan",       "The ying of yang [+100$ per click] [+100% passive $ per click]",type.passive,          () => {money_per_click+=100; money_per_click_passive+=1; addItemToInventory(unboxed_item)}),
+    new loot_class(rarity.rngesus,       "Sou",       "The yang of ying [+100$ per second] [+100% passive $ per second]",type.passive,          () => {money_per_second+=100; money_per_second_passive+=1; addItemToInventory(unboxed_item)}),
     new loot_class(rarity.rngesus,       "Time stop hat",  "Death is inevitable. Your time is valuable. [+1000$ per click]",type.onetime,          () => {money_per_click+=1000})
     
   ],
@@ -289,31 +283,40 @@ function initLootbox() {
     ]),
 
     new lootbox_class("Starter box",[
-      [rarity.common, 0.5],
-      [rarity.uncommon,0.45],
-      [rarity.rare,0.05]
+      [rarity.common, 0.6],
+      [rarity.uncommon,0.3],
+      [rarity.rare,0.1]
     ]),
 
     new lootbox_class("Greedy box",[
-      [rarity.common,0.9],
-      [rarity.rare,0.09],
-      [rarity.unique,0.01]
+      [rarity.common,0.7],
+      [rarity.rare,0.25],
+      [rarity.unique,0.05]
+    ]),
+
+    new lootbox_class("Pronto box",[
+      [rarity.common,0.5],
+      [rarity.uncommon,0.35],
+      [rarity.rare,0.125],
+      [rarity.unique,0.025],
+      
+      
     ]),
 
     new lootbox_class("Mystery box",[
-      [rarity.common,0.65],
-      [rarity.uncommon,0.15],
-      [rarity.rare,0.12],
-      [rarity.unique,0.05],
-      [rarity.extraordinary,0.02],
+      [rarity.common,0.6],
+      [rarity.uncommon,0.125],
+      [rarity.rare,0.15],
+      [rarity.unique,0.085],
+      [rarity.extraordinary,0.03],
       [rarity.rngesus,0.01]
     ]),
     
     new lootbox_class("Loot bag",[
-      [rarity.uncommon,0.5],
-      [rarity.rare,0.3],
-      [rarity.unique,0.1], 
-      [rarity.extraordinary,0.09], 
+      [rarity.uncommon,0.4],
+      [rarity.rare,0.33],
+      [rarity.unique,0.16], 
+      [rarity.extraordinary,0.1], 
       [rarity.rngesus,0.01]
     ])
     
@@ -369,14 +372,6 @@ function updateShopItems() {
   for (var childEl of elements.shop.children) {
     // Set the inner HTML of that child element to the values specificed in the shop_items array
     childEl.innerHTML=getShopHTML(shop_items[childEl.getElementsByTagName("button")[0].style.getPropertyValue("--button-id")])
-
-    // Set the shops onhover event
-    /*
-    console.log("yeah");
-    childEl.addEventListener("mouseover", onHover(true));
-    childEl.addEventListener("mouseout", onHover(false));
-    console.log("added");
-    */
 
     // Set the button to have a click event
     childEl.getElementsByTagName("button")[0].onclick=onBuy;
@@ -437,19 +432,12 @@ function getPieChartHTML(loot_array) {
     _html+=`${loot_array[i][0].color} ${_c*luck}%,`
     
   }
-  console.log("S HTML: ", _html.slice(0, -1) )
   return(_html.slice(0, -1) )
 }
 function getShopHoverHTML(item) {
   // If the current shop item is not a lootbox, return ""
   if (item.lootbox=="") { return ""; }
-  console.log("cur_rarities ", item.lootbox.loot_array)
   var html=`<div class="shop-hover-inner" `;
-  /*for(var i = 0; i < item.lootbox.loot_array.length; i++) {
-    console.log("chance: ", item.lootbox.loot_array[i][1] * 100);
-    html+=`<span class="shop-hover-rarity">${item.lootbox.loot_array[i][1] * 100}% | ${rarity_names[item.lootbox.loot_array[i][0].id]}</span>`
-  }
-  */
   html+=`style="background:
     radial-gradient(
       circle closest-side,
@@ -458,7 +446,6 @@ function getShopHoverHTML(item) {
     ),
     conic-gradient(${getPieChartHTML(item.lootbox.loot_array)});"`
   html+=`>loot chance</div>`
-  console.log("final html: ", html)
   return(html);
 }
 
@@ -594,8 +581,8 @@ function addItemToInventory(item) {
 
   // Create a new div element
   inventory_item=document.createElement("div")
-  // Set the coresponding class
-  inventory_item.classList.add("inventory-item")
+  // Set the coresponding classes
+  inventory_item.setAttribute("class","inventory-item font-bold")
   // Set the innerHTML to the item's name
   inventory_item.innerHTML=item.name
   // Set the background color to the item's rarity color
@@ -623,11 +610,9 @@ function showInventoryItem() {
 
 // Function to get all the lootbox data by its name
 function getLootbox(get_lootbox_name) {
-  console.log(">>>FINDING: ", get_lootbox_name)
   // Loop through all the boxes available
   for(var i = 0; i < loot_info.boxes.length; i++) {
     // if it matches the name, return it
-    console.log("FOUND", loot_info.boxes[i].name)
     
     if(loot_info.boxes[i].name==get_lootbox_name) {
       return (loot_info.boxes[i])
@@ -667,7 +652,6 @@ function lootboxStop() {
 
 function lootboxGetItem() {
   // This function goes in the spinner element and returns the innerHTML of the item thats the in the middle of the spinner
-  console.log("var", elements.spinner.children[middle_item].children[0].style.getPropertyValue("--very-well-hidden-item-name"))
   return (elements.spinner.children[middle_item].children[0].style.getPropertyValue("--very-well-hidden-item-name"))
 }
 
