@@ -79,14 +79,16 @@ body {
   background: white;
 }
 .inventory-title {
-  font-size:4vh;
+  
+  text-overflow: ellipsis;
+  font-size:min(4vw,4vh);
   border-bottom: 10px solid black;
   border-left: 10px solid black;
   border-right: 10px solid black;
   background: white;
   border-radius: 0px 0px 10px 10px;
   display:  block;
-  height:5vh;
+  height:min(5vw,5vh);
 }
 #shop-list {
   width: 45%;
@@ -158,7 +160,7 @@ body {
   display:flex;
   justify-content: space-between;
   flex-wrap:wrap;
-  width:clamp(270px,30vw,500px);
+  width:100%;
   height:auto;
   color:black;
   border: 2px black solid;
@@ -172,6 +174,7 @@ body {
   transition: padding-bottom 0.33s ease-in;
   background: white;
   z-index:1;
+  font-size:max(16px,2vw);
 }
 .shop-item > * {
   font-size:clamp(0.75em,1vw,1vw);
@@ -187,10 +190,19 @@ body {
   width: 35%;
   z-index:1;
 }
+#toggle-nightmode {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width:10%;
+  height: 10%;
+  border: 2px black solid;
+}
+
 .shop-item-button {
   z-index: 3 !important;
   cursor:pointer;
-  height:55%;
+  min-height:55%;
   text-align: center !important;
   border: black 2px solid;
   border-radius: 5px;
@@ -198,6 +210,9 @@ body {
   overflow:hidden;
   transition: box-shadow 0.1s;
   box-shadow: inset 1px 1px 0px 0px black;
+}
+.shop-item-desc {
+  font-size:66%;
 }
 #bottom-wrapper {
   user-select: none;
@@ -292,8 +307,8 @@ body {
   pointer-events: none;
 }
 .info {
-  height:10vh;
-  font-size: 2em;
+  display: block;
+  font-size: clamp(18px,1vw,420px);
 }
 .test-info {
   font-size: 66%;
@@ -374,7 +389,7 @@ body {
 #money-button {
   width: clamp(250px,33vw,33vw);
   aspect-ratio: 3/1;
-  margin-top:1vw;
+  margin-top:auto;
   font-size:clamp(2.5em, 5vw, 5vw);
   border: black solid 2px;
   border-radius: 0.5vw;
